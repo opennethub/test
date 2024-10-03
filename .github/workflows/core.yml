@@ -69,7 +69,7 @@ jobs:
           fi
 
           # clear workspace
-          rm *.sha265
+          rm *.sha256
           ls -la
           
       - name: GIT commit and push chges
