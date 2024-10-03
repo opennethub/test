@@ -37,10 +37,40 @@ jobs:
 
       - name: Check latest CoreDNS Version
         run: |
+          # Tag-Version des latest-release holen
           VERSION=$(curl -s https://api.github.com/repos/coredns/coredns/releases/latest | jq -r '.tag_name')
           echo $VERSION
+          
+          if [[ "$VERSION" != "$(cat latest.txt)" ]]
+          then
+                  # download der latest Asstes
+                  ASSETS=$(curl -s https://api.github.com/repos/coredns/coredns/releases/latest | jq -r '.assets[] | select(.name | contains("linux_amd64")) | .browser_download_url')
+                  for row in $ASSETS; do
+                          echo download ${row} 
+                          filename="${row##*/}"
+                          extension="${row##*.}"
+                          filewoent="${filename%.*}"
+                          wget -q --show-progress ${row}
+                          
+                          if [[ "$extension" == "sha256" ]]
+                          then
+                                  echo "sha256 vergleich für $filewoent"
+                                  sha_file=$(sha256sum $filewoent)
+                                  sha_soll=$(cat $filename)
+                                  
+                                  if [[ "$sha_file" == "$sha_soll" ]]
+                                  then
+                                          echo "Download erfolgreich!"
+                                  else
+                                          echo "Download kaputt :-("
+                                  fi
+                          fi
+                  done
+          else
+                  echo "Die Version $VERSION ist aktuell."
+          fi
+          
           ls -la
-          ls -la $GITHUB_WORKSPACE
           
 
 
