@@ -4,11 +4,8 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  schedule:
+    - cron: "0 * * * *"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -49,18 +46,19 @@ jobs:
                           echo download ${row} 
                           filename="${row##*/}"
                           extension="${row##*.}"
-                          filewoent="${filename%.*}"
+                          filewoext="${filename%.*}"
                           wget -q --show-progress ${row}
                           
                           if [[ "$extension" == "sha256" ]]
                           then
-                                  echo "sha256 vergleich für $filewoent"
-                                  sha_file=$(sha256sum $filewoent)
+                                  echo "sha256 vergleich für $filewoext"
+                                  sha_file=$(sha256sum $filewoext)
                                   sha_soll=$(cat $filename)
                                   
                                   if [[ "$sha_file" == "$sha_soll" ]]
                                   then
                                           echo "Download erfolgreich!"
+                                          echo $VERSION > latest.txt
                                   else
                                           echo "Download kaputt :-("
                                   fi
@@ -69,10 +67,21 @@ jobs:
           else
                   echo "Die Version $VERSION ist aktuell."
           fi
-          
+
+          # clear workspace
+          rm *.sha265
           ls -la
           
-
+      - name: GIT commit and push chges
+        env: 
+          CI_COMMIT_MESSAGE: Ci Update for CoreDNS
+          CI_COMMIT_AUTHOR: Continuous Integration
+        run: |
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "actionbot@noreply.github.com"
+          git add *
+          git commit -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
 
 
 
