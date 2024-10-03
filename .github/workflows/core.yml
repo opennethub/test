@@ -34,3 +34,19 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
+      - name: Check latest CoreDNS Version
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/coredns/coredns/releases/latest | jq -r '.tag_name')
+          echo $VERSION
+          ls -la
+          ls -la $GITHUB_WORKSPACE
+          
+
+
+
+
+
+
+
+          
