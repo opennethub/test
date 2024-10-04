@@ -78,7 +78,7 @@ jobs:
           git commit --dry-run && GITPUSH=true || GITPUSH=false
           echo $GITPUSH
           
-          if [[ $GITPUSH ]]
+          if $GITPUSH
           then
             git commit -m "${{ env.CI_COMMIT_MESSAGE }}"
             git push
