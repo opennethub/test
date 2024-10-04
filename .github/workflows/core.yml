@@ -25,16 +25,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-
       - name: Check latest CoreDNS Version
         run: |
           # Tag-Version des latest-release holen
@@ -62,7 +52,6 @@ jobs:
                                   then
                                           echo "Download erfolgreich!"
                                           echo $VERSION > latest.txt
-                                          rm $filename
                                   else
                                           echo "Download kaputt :-("
                                   fi
@@ -71,11 +60,11 @@ jobs:
           else
                   echo "Die Version $VERSION ist aktuell."
           fi
-
+          
           # debug workspace
           ls -la
           
-      - name: GIT commit and push chges
+      - name: GIT commit and push changes
         env: 
           CI_COMMIT_MESSAGE: Ci Update for CoreDNS
           CI_COMMIT_AUTHOR: Continuous Integration
@@ -83,9 +72,13 @@ jobs:
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "actionbot@noreply.github.com"
           git add *
-          git commit -m "${{ env.CI_COMMIT_MESSAGE }}"
-          git push
-
+          
+          git commit --dry-run && GITPUSH=true || GITPUSH=false
+          if [[ $GITPUSH ]]
+          then
+            git commit -m "${{ env.CI_COMMIT_MESSAGE }}"
+            git push
+          fi
 
 
 
