@@ -73,7 +73,11 @@ jobs:
           git config --global user.email "actionbot@noreply.github.com"
           git add *
           
+          git commit --dry-run && echo "Things to commit" || echo "Clean repo"
+          
           git commit --dry-run && GITPUSH=true || GITPUSH=false
+          echo $GITPUSH
+          
           if [[ $GITPUSH ]]
           then
             git commit -m "${{ env.CI_COMMIT_MESSAGE }}"
