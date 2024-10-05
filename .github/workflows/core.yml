@@ -63,7 +63,21 @@ jobs:
           
           # debug workspace
           ls -la
+
+      - name: Create Index in Readme Markdown File
+        run: |
+          echo "# CoreDNS Files" > README.md
+          echo " " >> README.md
+          echo "|Filename|Filesize|SHA256Hash|" >> README.md
+          echo "|--------|--------|----------|" >> README.md
+          for row in $(ls -r *.sha256); do
+               SHA265=$(cat ${row} | awk '{print $1}')
+               FILE=$(cat ${row} | awk '{print $2}')
+               SIZE=$(du -hsx $FILE | awk '{print $1}')
           
+               echo "|[$FILE](./$FILE)|$SIZE|[$SHA265](./$row)|" >> README.md
+          done
+        
       - name: GIT commit and push changes
         env: 
           CI_COMMIT_MESSAGE: Ci Update for CoreDNS
